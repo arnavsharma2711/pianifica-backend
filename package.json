@@ -1,0 +1,54 @@
+{
+  "name": "express-ts-boilerplate",
+  "version": "1.0.0",
+  "description": "A boilerplate for building scalable and modular applications using Express.js with TypeScript.",
+  "author": "Arnav Sharma <arnavsharma2711@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arnavsharma2711/express-ts-boilerplate.git"
+  },
+  "license": "MIT",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "format": "npx @biomejs/biome format --write ./src",
+    "vercel-build": "echo 'vercel-build'"
+  },
+  "lint-staged": {
+    "*.ts": "npm run format && npm run typecheck"
+  },
+  "keywords": [],
+  "dependencies": {
+    "biome": "^0.3.3",
+    "config": "^3.3.12",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "debug": "^4.4.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "luxon": "^3.5.0",
+    "morgan": "^1.10.0",
+    "verror": "^1.10.1",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "zod": "^3.24.1",
+    "zod-validation-error": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/config": "^3.3.5",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.10.5",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.3.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
