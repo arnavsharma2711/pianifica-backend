@@ -1,0 +1,254 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  organizationId    Int
+  firstName         String
+  lastName          String
+  username          String    @unique
+  email             String    @unique
+  password          String
+  profilePictureUrl String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now())
+  deletedAt         DateTime?
+
+  authoredTasks Task[]         @relation("TaskAuthor")
+  assignedTasks Task[]         @relation("TaskAssignee")
+  attachments   Attachment[]
+  comments      Comment[]
+  userRoles     UserRole[]
+  organization  Organization   @relation(fields: [organizationId], references: [id])
+  teams         TeamsOnUsers[]
+  Bookmark      Bookmark[]
+  Notification  Notification[]
+  Feedback      Feedback[]
+}
+
+enum Role {
+  SUPER_ADMIN
+  ORG_ADMIN
+  ORG_MEMBER
+}
+
+model UserRole {
+  userId    Int
+  role      Role
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, role])
+}
+
+model Team {
+  id             Int       @id @default(autoincrement())
+  organizationId Int
+  name           String
+  slug           String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  organization    Organization      @relation(fields: [organizationId], references: [id])
+  TeamsOnProjects TeamsOnProjects[]
+  TeamsOnUsers    TeamsOnUsers[]
+}
+
+enum UserTeamRole {
+  MANAGER
+  LEAD
+  MEMBER
+}
+
+model TeamsOnUsers {
+  teamId    Int
+  team      Team     @relation(fields: [teamId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  role      String
+  createdAt DateTime @default(now())
+
+  @@id([teamId, userId])
+}
+
+model Organization {
+  id        Int       @id @default(autoincrement())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  users    User[]
+  projects Project[]
+  teams    Team[]
+}
+
+model Project {
+  id             Int       @id @default(autoincrement())
+  organizationId Int
+  name           String
+  description    String?
+  startDate      DateTime?
+  endDate        DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  tasks           Task[]
+  organization    Organization      @relation(fields: [organizationId], references: [id])
+  TeamsOnProjects TeamsOnProjects[]
+}
+
+model TeamsOnProjects {
+  team      Team     @relation(fields: [teamId], references: [id])
+  teamId    Int
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId Int
+  createdAt DateTime @default(now())
+
+  @@id([teamId, projectId])
+}
+
+enum Status {
+  BLOCKED
+  TODO
+  IN_PROGRESS
+  UNDER_REVIEW
+  RELEASE_READY
+  COMPLETED
+}
+
+enum Priority {
+  BACKLOG
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskType {
+  ISSUE
+  FEATURE
+  IMPROVEMENT
+  REFACTOR
+  DOCUMENTATION
+}
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  title       String
+  type        TaskType  @default(FEATURE)
+  description String?
+  status      Status?
+  priority    Priority?
+  startDate   DateTime?
+  dueDate     DateTime?
+  points      Int?
+  projectId   Int
+  authorId    Int
+  assigneeId  Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+  deletedAt   DateTime?
+
+  project     Project       @relation(fields: [projectId], references: [id])
+  author      User          @relation("TaskAuthor", fields: [authorId], references: [id])
+  assignee    User?         @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  attachments Attachment[]
+  comments    Comment[]
+  tags        TagsOnTasks[]
+}
+
+model Attachment {
+  id           Int       @id @default(autoincrement())
+  fileUrl      String
+  fileName     String?
+  taskId       Int
+  uploadedById Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+  deletedAt    DateTime?
+
+  task       Task @relation(fields: [taskId], references: [id])
+  uploadedBy User @relation(fields: [uploadedById], references: [id])
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  taskId    Int
+  userId    Int
+  text      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Bookmark {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  entityType String
+  entityId   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Tag {
+  id        Int           @id @default(autoincrement())
+  name      String
+  slug      String
+  createdAt DateTime      @default(now())
+  tasks     TagsOnTasks[]
+}
+
+model TagsOnTasks {
+  tag       Tag      @relation(fields: [tagId], references: [id])
+  tagId     Int
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    Int
+  createdAt DateTime @default(now())
+
+  @@id([tagId, taskId])
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  type      String
+  subType   String
+  content   Json?
+  seenAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  stars     Int
+  title     String
+  content   String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
