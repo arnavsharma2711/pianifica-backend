@@ -24,6 +24,7 @@
   "keywords": [],
   "dependencies": {
     "@prisma/client": "^6.2.1",
+    "apisauce": "^3.1.0",
     "bcrypt": "^5.1.1",
     "biome": "^0.3.3",
     "config": "^3.3.12",
@@ -49,8 +50,10 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/luxon": "^3.4.2",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.10.5",
+    "@types/verror": "^1.10.10",
     "husky": "^8.0.0",
     "lint-staged": "^15.3.0",
     "nodemon": "^3.1.9",

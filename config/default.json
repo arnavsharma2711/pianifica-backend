@@ -1,6 +1,10 @@
 {
-  "serviceName": "express-ts-boilerplate",
+  "serviceName": "pianifica-backend",
   "serviceUrl": "",
   "timezone": "Asia/Kolkata",
-  "logDir": "/var/log/express-app"
+  "logDir": "/var/log/express-app",
+  "microServiceUrls":{
+    "mailerService": "https://mailer-api-arnavsharma2711.vercel.app/"
+  }
+
 }
