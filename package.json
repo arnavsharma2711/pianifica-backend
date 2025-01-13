@@ -10,11 +10,12 @@
   "license": "MIT",
   "main": "src/index.ts",
   "scripts": {
-    "start": "npx prisma generate && ts-node src/index.ts",
+    "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "format": "npx @biomejs/biome format --write ./src",
+    "postinstall": "npx prisma generate --schema='./prisma/schema.prisma'",
     "vercel-build": "echo 'vercel-build'"
   },
   "lint-staged": {
