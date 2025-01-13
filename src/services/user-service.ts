@@ -3,6 +3,7 @@ import { CustomError } from "../lib/error/custom.error";
 import { type FilterOptions, getDefaultFilter } from "../lib/filters";
 import { userSchema } from "../lib/schema/user.schema";
 import * as userModel from "../models/user-model";
+import * as userRoleModel from "../models/user-role-model";
 
 export const createNewUser = async ({
   organizationId,
@@ -14,6 +15,7 @@ export const createNewUser = async ({
   phone,
   username,
   designation,
+  role = "ORG_MEMBER",
 }: {
   organizationId: number;
   firstName: string;
@@ -24,6 +26,7 @@ export const createNewUser = async ({
   profilePictureUrl?: string;
   phone?: string;
   designation?: string;
+  role?: "SUPER_ADMIN" | "ORG_SUPER_ADMIN" | "ORG_ADMIN" | "ORG_MEMBER";
 }) => {
   const existingUserByEmail = await userModel.getUserByEmail({
     email,
@@ -51,6 +54,11 @@ export const createNewUser = async ({
     phone,
     username,
     designation,
+  });
+
+  await userRoleModel.createUserRole({
+    userId: user.id,
+    role,
   });
 
   return userSchema.parse(user);

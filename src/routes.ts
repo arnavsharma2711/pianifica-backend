@@ -3,12 +3,19 @@ import { healthCheck } from "./controllers/health";
 
 import { authenticationMiddleware } from "./middlewares/authentication";
 
+import * as authController from "./controllers/auth-controller";
 import * as organizationController from "./controllers/organization-controller";
 import * as userController from "./controllers/user-controller";
 
 const router = express.Router();
 
 router.get("/health", healthCheck);
+
+// Auth
+router.post("/auth/login", authController.login);
+router.post("/auth/me", authController.getCurrentUser);
+router.post("/auth/logout", authController.logout);
+router.post("/auth/resetPassword", authController.resetPassword);
 
 // Organization
 router.post("/organization", organizationController.createOrganization);

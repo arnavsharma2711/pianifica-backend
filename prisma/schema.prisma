@@ -24,7 +24,7 @@ model Organization {
   website     String?
   status      String    @default("active")
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
   users User[]
@@ -44,8 +44,43 @@ model User {
   verifiedAt        DateTime?
   lastLogin         DateTime?
   createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   deletedAt         DateTime?
 
+  userRoles    UserRole[]
   Organization Organization @relation(fields: [organizationId], references: [id])
+  UserToken    UserToken[]
+}
+
+enum TokenType {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+model UserToken {
+  userId    Int
+  token     String
+  type      TokenType
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, type])
+}
+
+enum Role {
+  SUPER_ADMIN
+  ORG_SUPER_ADMIN
+  ORG_ADMIN
+  ORG_MEMBER
+}
+
+model UserRole {
+  userId    Int
+  role      Role     @default(ORG_MEMBER)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, role])
 }

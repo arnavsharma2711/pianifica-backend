@@ -198,6 +198,7 @@ export const updateUser = async (updateBody: {
   profilePictureUrl?: string;
   phone?: string;
   designation?: string;
+  verifiedAt?: Date;
 }) => {
   const { id, ...data } = updateBody;
   return await prisma.user.update({
