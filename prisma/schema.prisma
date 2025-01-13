@@ -47,33 +47,5 @@ model User {
   updatedAt         DateTime  @default(now())
   deletedAt         DateTime?
 
-  userRoles    UserRole[]
   Organization Organization @relation(fields: [organizationId], references: [id])
-  UserToken    UserToken[]
-}
-
-model UserToken {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  token     String
-  type      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
-}
-
-enum Role {
-  SUPER_ADMIN
-  ORG_ADMIN
-  ORG_MEMBER
-}
-
-model UserRole {
-  userId    Int
-  role      Role
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-
-  @@unique([userId, role])
 }
