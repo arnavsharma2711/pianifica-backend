@@ -1,9 +1,10 @@
 import express from "express";
+import path from "node:path";
+process.env.NODE_CONFIG_DIR = path.join(path.resolve("./"), "config");
 import morganLogger from "morgan";
 import helmetSecurity from "helmet";
 import corsMiddleware from "cors";
 import cookieParserMiddleware from "cookie-parser";
-import path from "node:path";
 import responseMiddleware from "./middlewares/response";
 
 import { handleError, handleNotFound } from "./middlewares/middlewares";
