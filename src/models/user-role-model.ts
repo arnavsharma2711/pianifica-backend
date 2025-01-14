@@ -1,3 +1,4 @@
+import type { Role } from "@prisma/client";
 import prisma from "../connections/prisma";
 
 // Create
@@ -7,7 +8,7 @@ export const createUserRole = async ({
   role,
 }: {
   userId: number;
-  role: "SUPER_ADMIN" | "ORG_SUPER_ADMIN" | "ORG_ADMIN" | "ORG_MEMBER";
+  role: Role;
 }) => {
   return await prisma.userRole.create({
     data: {

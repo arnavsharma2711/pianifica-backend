@@ -13,13 +13,32 @@ router.get("/health", healthCheck);
 
 // Auth
 router.post("/auth/login", authController.login);
-router.post("/auth/me", authController.getCurrentUser);
 router.post("/auth/logout", authController.logout);
+router.get("/auth/me", authenticationMiddleware, authController.getCurrentUser);
 router.post("/auth/resetPassword", authController.resetPassword);
+router.post(
+  "/auth/verifyResetPassword",
+  authenticationMiddleware,
+  authController.verifyResetPassword
+);
+router.post(
+  "/auth/generateVerifyEmail",
+  authenticationMiddleware,
+  authController.generateUserEmail
+);
+router.post(
+  "/auth/verifyEmail",
+  authenticationMiddleware,
+  authController.verifyUserEmail
+);
 
 // Organization
 router.post("/organization", organizationController.createOrganization);
 router.get("/organizations", organizationController.getOrganizations);
+router.get(
+  "/organization/validate",
+  organizationController.checkOrganizationExists
+);
 router.get("/organization/:id", organizationController.getOrganization);
 router.put("/organization/:id", organizationController.updateOrganization);
 router.delete("/organization/:id", organizationController.deleteOrganization);
@@ -27,6 +46,7 @@ router.delete("/organization/:id", organizationController.deleteOrganization);
 // User
 router.post("/user", userController.createUser);
 router.get("/users", authenticationMiddleware, userController.getUsers);
+router.get("/user/validate", userController.checkUserEmailExists);
 router.get(
   "/user/:username",
   authenticationMiddleware,

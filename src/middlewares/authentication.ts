@@ -2,7 +2,8 @@ import { controllerWrapper } from "../lib/controllerWrapper";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import config from "config";
 import { CustomError } from "../lib/error/custom.error";
-import { getExistingUser } from "../services/user-service";
+import { getExistingUserById } from "../services/user-service";
+import { getUserRoleByUserId } from "../models/user-role-model";
 
 export const authenticationMiddleware = controllerWrapper(
   async (req, _res, next) => {
@@ -18,8 +19,12 @@ export const authenticationMiddleware = controllerWrapper(
       access_token,
       config.get("jwtSecret")
     ) as JwtPayload;
-    const userDetails = await getExistingUser({ id: decodedToken?.id });
-
+    const userDetails = await getExistingUserById({
+      id: decodedToken?.id,
+    });
+    const userRoles = await getUserRoleByUserId({
+      userId: userDetails.id,
+    });
     if (!userDetails) {
       throw new CustomError(401, "Invalid Access Token");
     }
@@ -29,6 +34,7 @@ export const authenticationMiddleware = controllerWrapper(
       email: userDetails.email,
       username: userDetails.username,
       organizationId: userDetails.organizationId,
+      userRoles: userRoles.map((role) => role.role),
     };
 
     next();

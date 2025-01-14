@@ -1,3 +1,4 @@
+import type { TokenType } from "@prisma/client";
 import prisma from "../connections/prisma";
 
 // Create
@@ -9,7 +10,7 @@ export const upsertUserToken = async ({
 }: {
   userId: number;
   token: string;
-  type: "RESET_PASSWORD" | "VERIFY_EMAIL";
+  type: TokenType;
   expiresAt: Date;
 }) => {
   return await prisma.userToken.upsert({
@@ -34,9 +35,23 @@ export const getUserTokenByUserId = async ({
   type,
 }: {
   userId: number;
-  type: "RESET_PASSWORD" | "VERIFY_EMAIL";
+  type: TokenType;
 }) => {
   return await prisma.userToken.findFirst({
     where: { userId, type },
+  });
+};
+
+// Delete
+export const deleteUserToken = async ({
+  userId,
+  type,
+}: {
+  userId: number;
+  type: TokenType;
+}) => {
+  return await prisma.userToken.update({
+    where: { userId_type: { userId, type } },
+    data: { expiresAt: new Date() },
   });
 };

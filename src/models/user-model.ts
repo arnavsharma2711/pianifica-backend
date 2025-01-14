@@ -252,6 +252,14 @@ export const updateUserPassword = async ({
   });
 };
 
+export const updateLastLogin = async ({ id }: { id: number }) => {
+  await prisma.user.update({
+    where: { id },
+    data: {
+      lastLogin: new Date(),
+    },
+  });
+};
 // Delete
 
 export const deleteUser = async ({ id }: { id: number }) => {

@@ -3,8 +3,15 @@ import { CustomError } from "../lib/error/custom.error";
 import { userSchema } from "../lib/schema/user.schema";
 import * as userModel from "../models/user-model";
 import { generateToken } from "../utils/commonUtils";
-import { generateUserToken, verifyUserToken } from "./user-token-service";
-import { sendVerifyMailService } from "./mailer-service";
+import {
+  deleteUserToken,
+  generateUserToken,
+  verifyUserToken,
+} from "./user-token-service";
+import {
+  sendResetPasswordMailService,
+  sendVerifyMailService,
+} from "./mailer-service";
 
 export const validateUserCredentials = async ({
   identifier,
@@ -38,6 +45,8 @@ export const validateUserCredentials = async ({
     throw new CustomError(401, "Invalid credentials");
   }
 
+  await userModel.updateLastLogin({ id: user.id });
+
   const access_token = await generateToken(
     {
       id: user.id,
@@ -66,12 +75,12 @@ export const generateResetPasswordToken = async ({
     type: "RESET_PASSWORD",
   });
 
-  await sendVerifyMailService(email, token);
+  await sendResetPasswordMailService(email, token);
 
   return token;
 };
 
-export const resetPassword = async ({
+export const verifyResetPasswordToken = async ({
   userId,
   newPassword,
 }: {
@@ -89,6 +98,8 @@ export const resetPassword = async ({
     password: newPassword,
   });
 
+  await deleteUserToken({ userId, type: "RESET_PASSWORD" });
+
   return "Password reset successfully";
 };
 
@@ -103,15 +114,21 @@ export const generateVerifyEmailToken = async ({
     throw new CustomError(404, "User not found");
   }
 
+  if (user.verifiedAt) {
+    throw new CustomError(400, "Email already verified");
+  }
+
   const token = await generateUserToken({
     email,
     type: "VERIFY_EMAIL",
   });
 
-  return { token };
+  await sendVerifyMailService(email, token);
+
+  return token;
 };
 
-export const verifyEmail = async ({ userId }: { userId: number }) => {
+export const verifyEmailToken = async ({ userId }: { userId: number }) => {
   const userToken = await verifyUserToken({ userId, type: "VERIFY_EMAIL" });
 
   if (!userToken) {
@@ -122,6 +139,8 @@ export const verifyEmail = async ({ userId }: { userId: number }) => {
     id: userId,
     verifiedAt: new Date(),
   });
+
+  await deleteUserToken({ userId, type: "VERIFY_EMAIL" });
 
   return "Email verified successfully";
 };

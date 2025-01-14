@@ -2,13 +2,14 @@ import * as userTokenModel from "../models/user-token-model";
 import * as userModel from "../models/user-model";
 import { CustomError } from "../lib/error/custom.error";
 import { generateToken } from "../utils/commonUtils";
+import type { TokenType } from "@prisma/client";
 
 export const generateUserToken = async ({
   email,
   type,
 }: {
   email: string;
-  type: "VERIFY_EMAIL" | "RESET_PASSWORD";
+  type: TokenType;
 }) => {
   const user = await userModel.getUserByEmail({ email });
 
@@ -38,7 +39,7 @@ export const verifyUserToken = async ({
   type,
 }: {
   userId: number;
-  type: "VERIFY_EMAIL" | "RESET_PASSWORD";
+  type: TokenType;
 }) => {
   const userToken = await userTokenModel.getUserTokenByUserId({
     userId,
@@ -54,4 +55,14 @@ export const verifyUserToken = async ({
   }
 
   return true;
+};
+
+export const deleteUserToken = async ({
+  userId,
+  type,
+}: {
+  userId: number;
+  type: TokenType;
+}) => {
+  await userTokenModel.deleteUserToken({ userId, type });
 };

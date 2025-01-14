@@ -9,6 +9,7 @@ export interface UserRequest extends Request {
     email: string;
     username: string;
     organizationId: number;
+    userRoles: string[];
   };
 }
 

@@ -5,8 +5,10 @@ import {
   organizationSchema,
   updateOrganizationSchema,
 } from "../lib/schema/organization.schema";
+import { createUserSchema } from "../lib/schema/user.schema";
 import { response } from "../middlewares/response";
 import {
+  checkOrganizationExistsByName,
   createNewOrganization,
   deleteExistingOrganization,
   getAllOrganizations,
@@ -14,10 +16,14 @@ import {
   updateExistingOrganization,
 } from "../services/organization-service";
 
-// POST api/organization
+// POST api/organization/?withUser=boolean
 export const createOrganization = controllerWrapper(async (req) => {
+  const { withUser = false } = req.query;
   const { name, description, address, phone, email, website } =
     createOrganizationSchema.parse(req.body);
+
+  const user =
+    withUser === "true" ? createUserSchema.parse(req.body?.user) : undefined;
 
   const organization = await createNewOrganization({
     name,
@@ -26,14 +32,31 @@ export const createOrganization = controllerWrapper(async (req) => {
     phone,
     email,
     website,
+    user,
   });
-
-  const organizationData = organizationSchema.parse(organization);
 
   response.success({
     status: 201,
     message: "Organization created successfully",
-    data: organizationData,
+    data: organization,
+  });
+});
+
+// GET api/organization/exists/?name=organizationName
+export const checkOrganizationExists = controllerWrapper(async (req) => {
+  const name = req.query.name as string;
+  if (!name) {
+    response.invalid({
+      message: "Organization name is required",
+    });
+    return;
+  }
+
+  const message = await checkOrganizationExistsByName({ name: name });
+
+  response.success({
+    status: 200,
+    message,
   });
 });
 

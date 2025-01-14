@@ -1,9 +1,10 @@
-import type { User } from "@prisma/client";
+import type { Role, User } from "@prisma/client";
 import { CustomError } from "../lib/error/custom.error";
 import { type FilterOptions, getDefaultFilter } from "../lib/filters";
 import { userSchema } from "../lib/schema/user.schema";
 import * as userModel from "../models/user-model";
 import * as userRoleModel from "../models/user-role-model";
+import { generateVerifyEmailToken } from "./auth-service";
 
 export const createNewUser = async ({
   organizationId,
@@ -26,7 +27,7 @@ export const createNewUser = async ({
   profilePictureUrl?: string;
   phone?: string;
   designation?: string;
-  role?: "SUPER_ADMIN" | "ORG_SUPER_ADMIN" | "ORG_ADMIN" | "ORG_MEMBER";
+  role?: Role;
 }) => {
   const existingUserByEmail = await userModel.getUserByEmail({
     email,
@@ -60,6 +61,8 @@ export const createNewUser = async ({
     userId: user.id,
     role,
   });
+
+  await generateVerifyEmailToken({ email });
 
   return userSchema.parse(user);
 };
@@ -141,6 +144,14 @@ export const getExistingUserByUsername = async ({
   }
 
   return userSchema.parse(user);
+};
+
+export const checkUserExistsByEmail = async ({ email }: { email: string }) => {
+  const user = await userModel.getUserByEmail({ email });
+  if (user) {
+    throw new CustomError(400, "User with this email already exists");
+  }
+  return "User does not exist";
 };
 
 export const updateExistingUser = async (updateBody: {

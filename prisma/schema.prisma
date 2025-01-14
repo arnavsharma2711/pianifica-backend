@@ -35,7 +35,7 @@ model User {
   organizationId    Int
   firstName         String
   lastName          String?
-  username          String    @unique
+  username          String
   email             String    @unique
   password          String
   profilePictureUrl String?
@@ -50,6 +50,8 @@ model User {
   userRoles    UserRole[]
   Organization Organization @relation(fields: [organizationId], references: [id])
   UserToken    UserToken[]
+
+  @@unique([username, organizationId])
 }
 
 enum TokenType {

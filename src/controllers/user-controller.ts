@@ -6,6 +6,7 @@ import {
   createNewUser,
   deleteExistingUser,
   getAllUsers,
+  checkUserExistsByEmail,
   getExistingUserByUsername,
   updateExistingUser,
   updateExistingUserEmail,
@@ -72,6 +73,26 @@ export const getUsers = controllerWrapper(async (req) => {
     status: 200,
     message: "Users fetched successfully",
     data: users,
+  });
+});
+
+// GET api/user/exists/?email=userEmail
+export const checkUserEmailExists = controllerWrapper(async (req) => {
+  const email = req.query.email as string;
+  if (!email) {
+    response.invalid({
+      message: "Email is required",
+    });
+    return;
+  }
+
+  const message = await checkUserExistsByEmail({
+    email,
+  });
+
+  response.success({
+    status: 200,
+    message,
   });
 });
 

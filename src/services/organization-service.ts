@@ -1,7 +1,9 @@
 import { CustomError } from "../lib/error/custom.error";
 import { type FilterOptions, getDefaultFilter } from "../lib/filters";
 import { organizationSchema } from "../lib/schema/organization.schema";
+import { userSchema } from "../lib/schema/user.schema";
 import * as organizationModel from "../models/organization-model";
+import { checkUserExistsByEmail, createNewUser } from "./user-service";
 
 export const createNewOrganization = async ({
   name,
@@ -10,6 +12,7 @@ export const createNewOrganization = async ({
   phone,
   email,
   website,
+  user,
 }: {
   name: string;
   description?: string;
@@ -17,13 +20,23 @@ export const createNewOrganization = async ({
   phone?: string;
   email?: string;
   website?: string;
+  user?: {
+    firstName: string;
+    lastName?: string;
+    username: string;
+    email: string;
+    password: string;
+    profilePictureUrl?: string;
+    phone?: string;
+    designation?: string;
+  };
 }) => {
-  const existingOrganization = await organizationModel.getOrganizationByName({
-    name,
-  });
-
-  if (existingOrganization) {
+  if (await organizationModel.getOrganizationByName({ name })) {
     throw new CustomError(400, "Organization with this name already exists");
+  }
+
+  if (user && (await checkUserExistsByEmail({ email: user.email }))) {
+    throw new CustomError(400, "User with this email already exists");
   }
 
   const organization = await organizationModel.createOrganization({
@@ -34,6 +47,26 @@ export const createNewOrganization = async ({
     email,
     website,
   });
+
+  if (user) {
+    const createdUser = await createNewUser({
+      organizationId: organization.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email,
+      password: user.password,
+      profilePictureUrl: user.profilePictureUrl,
+      phone: user.phone,
+      designation: user.designation,
+      role: "ORG_SUPER_ADMIN",
+    });
+
+    return {
+      user: userSchema.parse(createdUser),
+      organization: organizationSchema.parse(organization),
+    };
+  }
 
   return organizationSchema.parse(organization);
 };
@@ -73,6 +106,20 @@ export const getAllOrganizations = async ({
   );
 
   return { organizationsData, total_count };
+};
+
+export const checkOrganizationExistsByName = async ({
+  name,
+}: {
+  name: string;
+}) => {
+  const organization = await organizationModel.getOrganizationByName({ name });
+
+  if (organization) {
+    throw new CustomError(400, "Organization with this name already exists");
+  }
+
+  return "Organization does not exist";
 };
 
 export const updateExistingOrganization = async (updateBody: {
