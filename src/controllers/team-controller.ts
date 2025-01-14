@@ -11,6 +11,11 @@ import {
   updateExistingTeam,
 } from "../services/team-service";
 import {
+  assigneeNewTeamProject,
+  getExistingTeamProjects,
+  removeExistingTeamProject,
+} from "../services/teams-on-projects-service";
+import {
   addNewTeamMember,
   getExistingTeamMembers,
   getUserTeams,
@@ -218,7 +223,7 @@ export const deleteTeam = controllerWrapper(async (req) => {
   });
 });
 
-// POST api/team/:id/member
+// POST api/team/:id/member/:userId"
 export const addTeamMember = controllerWrapper(async (req) => {
   if (!req.user) {
     response.unauthorized({
@@ -226,15 +231,13 @@ export const addTeamMember = controllerWrapper(async (req) => {
     });
     return;
   }
-  const { id } = req.params;
+  const { id, userId } = req.params;
   if (!id) {
     response.invalid({
       message: "Team id is required",
     });
     return;
   }
-
-  const { userId } = req.body;
   if (!userId) {
     response.invalid({
       message: "User id is required",
@@ -256,7 +259,7 @@ export const addTeamMember = controllerWrapper(async (req) => {
   });
 });
 
-// DELETE api/team/:id/member
+// DELETE api/team/:id/member/:userId"
 export const removeTeamMember = controllerWrapper(async (req) => {
   if (!req.user) {
     response.unauthorized({
@@ -264,15 +267,13 @@ export const removeTeamMember = controllerWrapper(async (req) => {
     });
     return;
   }
-  const { id } = req.params;
+  const { id, userId } = req.params;
   if (!id) {
     response.invalid({
       message: "Team id is required",
     });
     return;
   }
-
-  const { userId } = req.body;
   if (!userId) {
     response.invalid({
       message: "User id is required",
@@ -326,5 +327,112 @@ export const getTeamMembers = controllerWrapper(async (req) => {
     status: 200,
     message: "Team members fetched successfully",
     data: members,
+  });
+});
+
+// POST api/team/:id/project/:projectId
+export const addTeamProject = controllerWrapper(async (req) => {
+  if (!req.user) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+  const { id, projectId } = req.params;
+  if (!id) {
+    response.invalid({
+      message: "Team id is required",
+    });
+    return;
+  }
+  if (!projectId) {
+    response.invalid({
+      message: "Project id is required",
+    });
+    return;
+  }
+
+  const team = await assigneeNewTeamProject({
+    teamId: Number(id),
+    projectId: Number(projectId),
+    addedBy: req.user.id,
+    isAdmin: req.user.isAdmin,
+  });
+
+  response.success({
+    status: 200,
+    message: "Team project added successfully",
+    data: team,
+  });
+});
+
+// DELETE api/team/:id/project/:projectId
+export const removeTeamProject = controllerWrapper(async (req) => {
+  if (!req.user) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+  const { id, projectId } = req.params;
+  if (!id) {
+    response.invalid({
+      message: "Team id is required",
+    });
+    return;
+  }
+  if (!projectId) {
+    response.invalid({
+      message: "Project id is required",
+    });
+    return;
+  }
+
+  await removeExistingTeamProject({
+    teamId: Number(id),
+    projectId: Number(projectId),
+    deletedBy: req.user.id,
+    isAdmin: req.user.isAdmin,
+  });
+
+  response.success({
+    status: 200,
+    message: "Team project removed successfully",
+  });
+});
+
+// GET api/team/:id/projects
+export const getTeamProjects = controllerWrapper(async (req) => {
+  if (!req.user) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+  const { id } = req.params;
+  if (!id) {
+    response.invalid({
+      message: "Team id is required",
+    });
+    return;
+  }
+
+  const { query, page, limit, orderBy, order } = filterSchema.parse(req.query);
+  const projects = await getExistingTeamProjects({
+    teamId: Number(id),
+    organizationId: req.user.organizationId,
+    filters: {
+      query,
+      page,
+      limit,
+      orderBy,
+      order,
+    },
+  });
+
+  response.success({
+    status: 200,
+    message: "Team projects fetched successfully",
+    data: projects,
   });
 });

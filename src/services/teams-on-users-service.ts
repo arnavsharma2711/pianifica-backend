@@ -3,6 +3,8 @@ import { type FilterOptions, getDefaultFilter } from "../lib/filters";
 import { CustomError } from "../lib/error/custom.error";
 import type { TeamRole } from "@prisma/client";
 import { getExistingTeamById } from "./team-service";
+import { userSchema } from "../lib/schema/user.schema";
+import { teamSchema } from "../lib/schema/team.schema";
 
 export const addNewTeamMember = async ({
   userId,
@@ -69,7 +71,13 @@ export const getExistingTeamMembers = async ({
       filters: getDefaultFilter(filters),
     });
 
-  return { users, total_count };
+  return {
+    users: users.map((user) => ({
+      ...userSchema.parse(user.user),
+      role: user.role,
+    })),
+    total_count,
+  };
 };
 
 export const getUserTeams = async ({
@@ -85,7 +93,10 @@ export const getUserTeams = async ({
       filters: getDefaultFilter(filters),
     });
 
-  return { teams, total_count };
+  return {
+    teams: teams.map((team) => teamSchema.parse(team.team)),
+    total_count,
+  };
 };
 
 export const updateExistingTeamMemberRole = async ({

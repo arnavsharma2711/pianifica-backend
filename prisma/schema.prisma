@@ -27,8 +27,9 @@ model Organization {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  users User[]
-  teams Team[]
+  users    User[]
+  teams    Team[]
+  projects Project[]
 }
 
 model User {
@@ -89,6 +90,29 @@ model UserRole {
   @@unique([userId, role])
 }
 
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  BLOCKED
+  COMPLETED
+}
+
+model Project {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  name           String
+  description    String?
+  budget         Float?
+  status         ProjectStatus @default(ACTIVE)
+  createdBy      Int
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  organization    Organization      @relation(fields: [organizationId], references: [id])
+  teamsOnProjects TeamsOnProjects[]
+}
+
 model Team {
   id             Int       @id @default(autoincrement())
   organizationId Int
@@ -98,8 +122,9 @@ model Team {
   updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
 
-  organization Organization   @relation(fields: [organizationId], references: [id])
-  teamsOnUsers TeamsOnUsers[]
+  organization    Organization      @relation(fields: [organizationId], references: [id])
+  teamsOnUsers    TeamsOnUsers[]
+  teamsOnProjects TeamsOnProjects[]
 
   @@unique([name, organizationId])
 }
@@ -119,4 +144,15 @@ model TeamsOnUsers {
   team Team @relation(fields: [teamId], references: [id])
 
   @@unique([userId, teamId])
+}
+
+model TeamsOnProjects {
+  teamId    Int
+  projectId Int
+  createdAt DateTime @default(now())
+
+  team    Team    @relation(fields: [teamId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@id([teamId, projectId])
 }

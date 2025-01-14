@@ -15,6 +15,12 @@ export const sendMail = async (
     html: string;
   },
 ) => {
+  if (config.get<string>("env") === "development") {
+    return {
+      ok: true,
+      data: { success: true, message: "Mail sent successfully" },
+    };
+  }
   const requestOptions = {
     headers: {
       "x-auth-token": await generateToken(

@@ -14,7 +14,7 @@ export interface FilterOptions {
   order?: "asc" | "desc";
 }
 
-const DEFAULT_SORT_BY = "id";
+const DEFAULT_SORT_BY = "createdAt";
 const DEFAULT_LIMIT = 10;
 const DEFAULT_PAGE = 1;
 const DEFAULT_ORDER = "desc";

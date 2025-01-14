@@ -12,6 +12,7 @@ import * as authController from "./controllers/auth-controller";
 import * as organizationController from "./controllers/organization-controller";
 import * as userController from "./controllers/user-controller";
 import * as teamController from "./controllers/team-controller";
+import * as projectController from "./controllers/project-controller";
 
 const router = express.Router();
 
@@ -130,14 +131,62 @@ router.get(
   teamController.getTeamMembers,
 );
 router.post(
-  "/team/:id/member",
+  "/team/:id/member/:userId",
   authenticationMiddleware,
   teamController.addTeamMember,
 );
 router.delete(
-  "/team/:id/member",
+  "/team/:id/member/:userId",
   authenticationMiddleware,
   teamController.removeTeamMember,
+);
+router.get(
+  "/team/:id/projects",
+  authenticationMiddleware,
+  teamController.getTeamProjects,
+);
+router.post(
+  "/team/:id/project/:projectId",
+  authenticationMiddleware,
+  teamController.addTeamProject,
+);
+router.delete(
+  "/team/:id/project/:projectId",
+  authenticationMiddleware,
+  teamController.removeTeamProject,
+);
+
+// Project
+router.post("/project", authenticationMiddleware, projectController.createTeam);
+router.get(
+  "/projects",
+  authenticationMiddleware,
+  projectController.getProjects,
+);
+router.get(
+  "/project/validate",
+  authenticationMiddleware,
+  projectController.checkProjectExists,
+);
+router.get(
+  "/project/:id",
+  authenticationMiddleware,
+  projectController.getProject,
+);
+router.put(
+  "/project/:id",
+  authenticationMiddleware,
+  projectController.updateProject,
+);
+router.delete(
+  "/project/:id",
+  authenticationMiddleware,
+  projectController.deleteProject,
+);
+router.get(
+  "/project/:id/teams",
+  authenticationMiddleware,
+  projectController.getProjectTeams,
 );
 
 export default router;
