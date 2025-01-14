@@ -70,14 +70,16 @@ export const createNewUser = async ({
 export const getAllUsers = async ({
   organizationId,
   filters,
+  fetchDeleted = false,
 }: {
   organizationId: number;
   filters: FilterOptions;
+  fetchDeleted?: boolean;
 }) => {
   const { users, totalCount } = await userModel.getUsers({
     organizationId,
     filters: getDefaultFilter(filters),
-    fetchDeleted: false,
+    fetchDeleted,
   });
 
   const usersData = users.map((user) => userSchema.parse(user));

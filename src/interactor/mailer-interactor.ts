@@ -19,7 +19,7 @@ export const sendMail = async (
     headers: {
       "x-auth-token": await generateToken(
         { to },
-        "1h",
+        "5min",
         config.get<string>("microServiceSecrets.mailerService"),
       ),
     },

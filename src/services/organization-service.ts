@@ -35,8 +35,8 @@ export const createNewOrganization = async ({
     throw new CustomError(400, "Organization with this name already exists");
   }
 
-  if (user && (await checkUserExistsByEmail({ email: user.email }))) {
-    throw new CustomError(400, "User with this email already exists");
+  if (user) {
+    await checkUserExistsByEmail({ email: user.email });
   }
 
   const organization = await organizationModel.createOrganization({

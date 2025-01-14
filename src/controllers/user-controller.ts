@@ -13,6 +13,7 @@ import {
   updateExistingUserPassword,
   updateExistingUserUsername,
 } from "../services/user-service";
+import { isOrgSuperAdmin } from "../utils/commonUtils";
 
 // POST api/user
 export const createUser = controllerWrapper(async (req) => {
@@ -56,7 +57,8 @@ export const getUsers = controllerWrapper(async (req) => {
     return;
   }
 
-  const { query, page, limit, orderBy, order } = filterSchema.parse(req.query);
+  const { query, page, limit, orderBy, order, fetchDeleted } =
+    filterSchema.parse(req.query);
   const users = await getAllUsers({
     organizationId: req.user.organizationId,
 
@@ -67,6 +69,7 @@ export const getUsers = controllerWrapper(async (req) => {
       orderBy,
       order,
     },
+    fetchDeleted: isOrgSuperAdmin(req.user.userRoles) && fetchDeleted,
   });
 
   response.success({

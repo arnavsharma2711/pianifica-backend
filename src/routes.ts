@@ -5,11 +5,13 @@ import {
   authenticationMiddleware,
   adminAuthenticationMiddleware,
   superAdminAuthenticationMiddleware,
+  superUserAuthenticationMiddleware,
 } from "./middlewares/authentication";
 
 import * as authController from "./controllers/auth-controller";
 import * as organizationController from "./controllers/organization-controller";
 import * as userController from "./controllers/user-controller";
+import * as teamController from "./controllers/team-controller";
 
 const router = express.Router();
 
@@ -53,7 +55,7 @@ router.post(
 router.get(
   "/organizations",
   authenticationMiddleware,
-  superAdminAuthenticationMiddleware,
+  superUserAuthenticationMiddleware,
   organizationController.getOrganizations,
 );
 router.get(
@@ -63,7 +65,7 @@ router.get(
 router.get(
   "/organization/:id",
   authenticationMiddleware,
-  superAdminAuthenticationMiddleware,
+  superUserAuthenticationMiddleware,
   organizationController.getOrganization,
 );
 router.put(
@@ -110,5 +112,32 @@ router.patch(
   userController.updateUserPassword,
 );
 router.delete("/user/:id", authenticationMiddleware, userController.deleteUser);
+
+// Team
+router.post("/team", authenticationMiddleware, teamController.createTeam);
+router.get("/teams", authenticationMiddleware, teamController.getTeams);
+router.get(
+  "/team/validate",
+  authenticationMiddleware,
+  teamController.checkTeamExists,
+);
+router.get("/team/:id", authenticationMiddleware, teamController.getTeamById);
+router.put("/team/:id", authenticationMiddleware, teamController.updateTeam);
+router.delete("/team/:id", authenticationMiddleware, teamController.deleteTeam);
+router.get(
+  "/team/:id/members",
+  authenticationMiddleware,
+  teamController.getTeamMembers,
+);
+router.post(
+  "/team/:id/member",
+  authenticationMiddleware,
+  teamController.addTeamMember,
+);
+router.delete(
+  "/team/:id/member",
+  authenticationMiddleware,
+  teamController.removeTeamMember,
+);
 
 export default router;

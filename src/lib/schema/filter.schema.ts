@@ -12,4 +12,8 @@ export const filterSchema = z.object({
     .optional(),
   orderBy: z.enum(["createdAt", "updatedAt", "id"]).optional(),
   order: z.enum(["asc", "desc"]).optional(),
+  fetchDeleted: z
+    .string()
+    .transform((val) => val === "true")
+    .optional(),
 });

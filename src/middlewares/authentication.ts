@@ -73,3 +73,16 @@ export const superAdminAuthenticationMiddleware = controllerWrapper(
     next();
   },
 );
+
+export const superUserAuthenticationMiddleware = controllerWrapper(
+  async (req, _res, next) => {
+    if (!req.user?.userRoles.some((role) => role === "SUPER_ADMIN")) {
+      throw new CustomError(
+        401,
+        "You are not authorized to perform this action",
+      );
+    }
+
+    next();
+  },
+);
