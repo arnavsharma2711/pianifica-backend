@@ -13,14 +13,14 @@ export const sendMail = async (
   payload: {
     subject: string;
     html: string;
-  }
+  },
 ) => {
   const requestOptions = {
     headers: {
       "x-auth-token": await generateToken(
         { to },
         "1h",
-        config.get<string>("microServiceSecrets.mailerService")
+        config.get<string>("microServiceSecrets.mailerService"),
       ),
     },
   };
@@ -32,7 +32,7 @@ export const sendMail = async (
   const response = await mailerService.post<MailerResponse>(
     "/send-email",
     payload,
-    requestOptions
+    requestOptions,
   );
 
   if (!response.ok || !response.data?.success) {

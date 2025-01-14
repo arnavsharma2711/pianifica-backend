@@ -22,7 +22,7 @@ export const generateUserToken = async ({
       email,
       organizationId: user.organizationId,
     },
-    "1h"
+    "1h",
   );
   await userTokenModel.upsertUserToken({
     userId: user.id,

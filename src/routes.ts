@@ -1,7 +1,11 @@
 import express from "express";
 import { healthCheck } from "./controllers/health";
 
-import { authenticationMiddleware } from "./middlewares/authentication";
+import {
+  authenticationMiddleware,
+  adminAuthenticationMiddleware,
+  superAdminAuthenticationMiddleware,
+} from "./middlewares/authentication";
 
 import * as authController from "./controllers/auth-controller";
 import * as organizationController from "./controllers/organization-controller";
@@ -19,54 +23,91 @@ router.post("/auth/resetPassword", authController.resetPassword);
 router.post(
   "/auth/verifyResetPassword",
   authenticationMiddleware,
-  authController.verifyResetPassword
+  authController.verifyResetPassword,
 );
 router.post(
   "/auth/generateVerifyEmail",
   authenticationMiddleware,
-  authController.generateUserEmail
+  authController.generateUserEmail,
 );
 router.post(
   "/auth/verifyEmail",
   authenticationMiddleware,
-  authController.verifyUserEmail
+  authController.verifyUserEmail,
 );
 
 // Organization
 router.post("/organization", organizationController.createOrganization);
-router.get("/organizations", organizationController.getOrganizations);
+router.post(
+  "/organization/:id/promoteUser",
+  authenticationMiddleware,
+  adminAuthenticationMiddleware,
+  organizationController.promoteUser,
+);
+router.post(
+  "/organization/:id/demoteUser",
+  authenticationMiddleware,
+  adminAuthenticationMiddleware,
+  organizationController.demoteUser,
+);
+router.get(
+  "/organizations",
+  authenticationMiddleware,
+  superAdminAuthenticationMiddleware,
+  organizationController.getOrganizations,
+);
 router.get(
   "/organization/validate",
-  organizationController.checkOrganizationExists
+  organizationController.checkOrganizationExists,
 );
-router.get("/organization/:id", organizationController.getOrganization);
-router.put("/organization/:id", organizationController.updateOrganization);
-router.delete("/organization/:id", organizationController.deleteOrganization);
+router.get(
+  "/organization/:id",
+  authenticationMiddleware,
+  superAdminAuthenticationMiddleware,
+  organizationController.getOrganization,
+);
+router.put(
+  "/organization/:id",
+  authenticationMiddleware,
+  superAdminAuthenticationMiddleware,
+  organizationController.updateOrganization,
+);
+router.delete(
+  "/organization/:id",
+  authenticationMiddleware,
+  superAdminAuthenticationMiddleware,
+  organizationController.deleteOrganization,
+);
 
 // User
-router.post("/user", userController.createUser);
+router.post(
+  "/user",
+  authenticationMiddleware,
+  adminAuthenticationMiddleware,
+  userController.createUser,
+);
 router.get("/users", authenticationMiddleware, userController.getUsers);
 router.get("/user/validate", userController.checkUserEmailExists);
 router.get(
   "/user/:username",
   authenticationMiddleware,
-  userController.getUserByUsername
+  userController.getUserByUsername,
 );
 router.put("/user/:id", authenticationMiddleware, userController.updateUser);
 router.patch(
   "/user/:id/email",
   authenticationMiddleware,
-  userController.updateUserEmail
+  userController.updateUserEmail,
 );
 router.patch(
   "/user/:id/username",
   authenticationMiddleware,
-  userController.updateUserUsername
+  userController.updateUserUsername,
 );
 router.patch(
   "/user/:id/password",
   authenticationMiddleware,
-  userController.updateUserPassword
+  userController.updateUserPassword,
 );
 router.delete("/user/:id", authenticationMiddleware, userController.deleteUser);
 

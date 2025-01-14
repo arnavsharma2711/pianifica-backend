@@ -33,7 +33,7 @@ export const deleteUserRole = async ({
   role,
 }: {
   userId: number;
-  role: "SUPER_ADMIN" | "ORG_ADMIN" | "ORG_MEMBER";
+  role: Role;
 }) => {
   return await prisma.userRole.delete({
     where: { userId_role: { userId, role } },

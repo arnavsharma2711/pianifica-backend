@@ -10,17 +10,18 @@ export interface UserRequest extends Request {
     username: string;
     organizationId: number;
     userRoles: string[];
+    isAdmin: boolean;
   };
 }
 
 type ControllerFunction = (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => Promise<void>;
 
 export const controllerWrapper = (
-  fn: ControllerFunction
+  fn: ControllerFunction,
 ): ControllerFunction => {
   return async (req: UserRequest, res: Response, next: NextFunction) => {
     try {

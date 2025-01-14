@@ -53,7 +53,7 @@ export const validateUserCredentials = async ({
       email: user.email,
       organizationId: user.organizationId,
     },
-    "6h"
+    "6h",
   );
 
   return { user: userSchema.parse(user), access_token };

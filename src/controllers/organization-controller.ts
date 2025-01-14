@@ -1,4 +1,4 @@
-import { controllerWrapper } from "../lib/controllerWrapper";
+import { controllerWrapper, type UserRequest } from "../lib/controllerWrapper";
 import { filterSchema } from "../lib/schema/filter.schema";
 import {
   createOrganizationSchema,
@@ -15,6 +15,22 @@ import {
   getOrganizationById,
   updateExistingOrganization,
 } from "../services/organization-service";
+import {
+  demoteUserToMember,
+  promoteUserToAdmin,
+} from "../services/user-role-service";
+import { isOrgSuperAdmin, isSuperAdmin } from "../utils/commonUtils";
+
+const authorization = (req: UserRequest, organizationId: number): boolean => {
+  if (!req.user) return false;
+
+  const { userRoles, organizationId: userOrgId } = req.user;
+
+  return (
+    isSuperAdmin(userRoles) ||
+    (userOrgId === organizationId && isOrgSuperAdmin(userRoles))
+  );
+};
 
 // POST api/organization/?withUser=boolean
 export const createOrganization = controllerWrapper(async (req) => {
@@ -39,6 +55,72 @@ export const createOrganization = controllerWrapper(async (req) => {
     status: 201,
     message: "Organization created successfully",
     data: organization,
+  });
+});
+
+// POST api/organization/:id/promoteUser
+export const promoteUser = controllerWrapper(async (req) => {
+  const { id } = req.params;
+  if (!id) {
+    response.invalid({
+      message: "Organization id is required",
+    });
+    return;
+  }
+
+  const { username } = req.body;
+  if (!username) {
+    response.invalid({
+      message: "username is required",
+    });
+    return;
+  }
+
+  if (!authorization(req, Number(id))) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+
+  await promoteUserToAdmin({ username, organizationId: Number(id) });
+
+  response.success({
+    status: 200,
+    message: "User promoted successfully",
+  });
+});
+
+// POST api/organization/:id/demoteUser
+export const demoteUser = controllerWrapper(async (req) => {
+  const { id } = req.params;
+  if (!id) {
+    response.invalid({
+      message: "Organization id is required",
+    });
+    return;
+  }
+
+  const { username } = req.body;
+  if (!username) {
+    response.invalid({
+      message: "username is required",
+    });
+    return;
+  }
+
+  if (!authorization(req, Number(id))) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+
+  await demoteUserToMember({ username, organizationId: Number(id) });
+
+  response.success({
+    status: 200,
+    message: "User promoted successfully",
   });
 });
 
@@ -108,6 +190,12 @@ export const updateOrganization = controllerWrapper(async (req) => {
     });
     return;
   }
+  if (!authorization(req, Number(id))) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
 
   const { name, description, address, phone, email, website } =
     updateOrganizationSchema.parse(req.body);
@@ -135,6 +223,12 @@ export const deleteOrganization = controllerWrapper(async (req) => {
   if (!id) {
     response.invalid({
       message: "Organization id is required",
+    });
+    return;
+  }
+  if (!authorization(req, Number(id))) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
     });
     return;
   }

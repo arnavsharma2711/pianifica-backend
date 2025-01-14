@@ -102,7 +102,7 @@ export const getAllOrganizations = async ({
     });
 
   const organizationsData = organizations.map((organization) =>
-    organizationSchema.parse(organization)
+    organizationSchema.parse(organization),
   );
 
   return { organizationsData, total_count };

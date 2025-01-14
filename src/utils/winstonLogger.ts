@@ -28,21 +28,21 @@ const logLineFormat = winston.format.printf(
   (info) => `${info.timestamp} \
 ["-"] \
 [${info.label}] \
-${info.level.toUpperCase()}: ${info.message}`
+${info.level.toUpperCase()}: ${info.message}`,
 );
 const format = winston.format.combine(
   winston.format.label({ label: serviceName }),
   timestampFormat({ zone: config.get("timezone") }),
-  logLineFormat
+  logLineFormat,
 );
 const winstonTransports = [];
 if (["stage", "beta", "production"].includes(process.env.NODE_ENV || "")) {
   winstonTransports.push(
-    new WinstonDailyRotateFile(winstonTransportConfig.fileRotateConfig)
+    new WinstonDailyRotateFile(winstonTransportConfig.fileRotateConfig),
   );
 } else {
   winstonTransports.push(
-    new winston.transports.Console(winstonTransportConfig.consoleConfig)
+    new winston.transports.Console(winstonTransportConfig.consoleConfig),
   );
 }
 const winstonLogger = winston.createLogger({

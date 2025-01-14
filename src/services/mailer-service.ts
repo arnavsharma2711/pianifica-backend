@@ -3,7 +3,7 @@ import config from "config";
 
 export const sendVerifyMailService = async (
   receiver: string,
-  verificationToken: string
+  verificationToken: string,
 ) => {
   const html = `
     <h1>
@@ -13,7 +13,7 @@ export const sendVerifyMailService = async (
       Click the link below to verify your email
         </p>
     <a href="${config.get(
-      "serviceUrl"
+      "serviceUrl",
     )}/verify-email/?token=${verificationToken}">
       Verify Email
     </a>
@@ -39,7 +39,7 @@ export const sendVerifyMailService = async (
 
 export const sendResetPasswordMailService = async (
   receiver: string,
-  verificationToken: string
+  verificationToken: string,
 ) => {
   const html = `
     <h1>
@@ -49,7 +49,7 @@ export const sendResetPasswordMailService = async (
       Click the link below to reset your password
         </p>
     <a href="${config.get(
-      "serviceUrl"
+      "serviceUrl",
     )}/reset-password/?token=${verificationToken}">
       Reset Password
     </a>
