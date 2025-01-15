@@ -6,15 +6,45 @@ import { getExistingTeamById } from "./team-service";
 import { getExistingProjectById } from "./project-service";
 import { teamSchema } from "../lib/schema/team.schema";
 import { projectSchema } from "../lib/schema/project.schema";
+import { createMultipleNotifications } from "./notification-service";
+
+const generateTeamNotification = async ({
+  projectId,
+  teamId,
+  status,
+  variables,
+}: {
+  projectId: number;
+  teamId: number;
+  status: string;
+  variables: Record<string, string>;
+}) => {
+  const result = await teamsOnUsersModel.getAllTeamsOnUsersByTeamId({
+    teamId,
+  });
+  const userIds = result.map((record) => record.userId);
+
+  if (userIds.length > 0) {
+    await createMultipleNotifications({
+      userIds,
+      notifiableType: "Project",
+      notifiableId: projectId,
+      status,
+      variables,
+    });
+  }
+};
 
 export const assigneeNewTeamProject = async ({
   teamId,
   projectId,
+  organizationId,
   addedBy,
   isAdmin,
 }: {
   teamId: number;
   projectId: number;
+  organizationId: number;
   addedBy: number;
   isAdmin: boolean;
 }) => {
@@ -32,6 +62,13 @@ export const assigneeNewTeamProject = async ({
     }
   }
 
+  const project = await getExistingProjectById({
+    id: projectId,
+    organizationId,
+  });
+
+  const team = await getExistingTeamById({ id: teamId, organizationId });
+
   const existingTeamOnProject =
     await teamsOnProjectsModel.getTeamsOnProjectsByTeamIdAndProjectId({
       teamId,
@@ -43,6 +80,16 @@ export const assigneeNewTeamProject = async ({
   await teamsOnProjectsModel.createTeamsOnProjects({
     teamId,
     projectId,
+  });
+
+  generateTeamNotification({
+    projectId,
+    teamId,
+    status: "Assigned",
+    variables: {
+      "<team_name>": team.name,
+      "<project_name>": project.name,
+    },
   });
 };
 
@@ -104,11 +151,13 @@ export const getExistingProjectTeams = async ({
 export const removeExistingTeamProject = async ({
   teamId,
   projectId,
+  organizationId,
   deletedBy,
   isAdmin,
 }: {
   teamId: number;
   projectId: number;
+  organizationId: number;
   deletedBy: number;
   isAdmin: boolean;
 }) => {
@@ -126,6 +175,13 @@ export const removeExistingTeamProject = async ({
     }
   }
 
+  const project = await getExistingProjectById({
+    id: projectId,
+    organizationId,
+  });
+
+  const team = await getExistingTeamById({ id: teamId, organizationId });
+
   const existingTeamOnProject =
     await teamsOnProjectsModel.getTeamsOnProjectsByTeamIdAndProjectId({
       teamId,
@@ -137,5 +193,15 @@ export const removeExistingTeamProject = async ({
   await teamsOnProjectsModel.deleteTeamsOnProjects({
     teamId,
     projectId,
+  });
+
+  generateTeamNotification({
+    projectId,
+    teamId,
+    status: "Unassigned",
+    variables: {
+      "<team_name>": team.name,
+      "<project_name>": project.name,
+    },
   });
 };

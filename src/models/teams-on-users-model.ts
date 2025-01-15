@@ -90,6 +90,19 @@ export const getTeamsOnUsersByUserIdAndTeamId = async ({
   });
 };
 
+export const getAllTeamsOnUsersByTeamId = async ({
+  teamId,
+}: {
+  teamId: number;
+}) => {
+  return await prisma.teamsOnUsers.findMany({
+    where: { teamId },
+    select: {
+      userId: true,
+    },
+  });
+};
+
 // Update
 
 export const updateTeamsOnUsersRole = async ({

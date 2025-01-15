@@ -13,6 +13,7 @@ import * as organizationController from "./controllers/organization-controller";
 import * as userController from "./controllers/user-controller";
 import * as teamController from "./controllers/team-controller";
 import * as projectController from "./controllers/project-controller";
+import * as notificationController from "./controllers/notification-controller";
 
 const router = express.Router();
 
@@ -187,6 +188,33 @@ router.get(
   "/project/:id/teams",
   authenticationMiddleware,
   projectController.getProjectTeams,
+);
+
+// Notification
+router.get(
+  "/notifications",
+  authenticationMiddleware,
+  notificationController.getAllNotifications,
+);
+router.patch(
+  "/notifications/markAllAsRead",
+  authenticationMiddleware,
+  notificationController.markAllNotificationsAsRead,
+);
+router.patch(
+  "/notification/:id/markAsRead",
+  authenticationMiddleware,
+  notificationController.markNotificationAsRead,
+);
+router.patch(
+  "/notification/:id/markAsUnread",
+  authenticationMiddleware,
+  notificationController.markNotificationAsUnread,
+);
+router.delete(
+  "/notification/:id",
+  authenticationMiddleware,
+  notificationController.deleteNotification,
 );
 
 export default router;

@@ -4,6 +4,7 @@ import { type FilterOptions, getDefaultFilter } from "../lib/filters";
 import { teamSchema } from "../lib/schema/team.schema";
 import { getTeamsOnUsersByUserIdAndTeamId } from "../models/teams-on-users-model";
 import { addNewTeamMember } from "./teams-on-users-service";
+import { createNewNotification } from "./notification-service";
 
 export const createNewTeam = async ({
   name,
@@ -31,9 +32,20 @@ export const createNewTeam = async ({
   await addNewTeamMember({
     userId: createdBy,
     teamId: team.id,
+    organizationId,
     role: "MANAGER",
     isAdmin: true,
     addedBy: createdBy,
+  });
+
+  await createNewNotification({
+    userId: createdBy,
+    notifiableType: "Team",
+    notifiableId: team.id,
+    status: "Created",
+    variables: {
+      "<team_name>": team.name,
+    },
   });
 
   return teamSchema.parse(team);
@@ -53,8 +65,6 @@ export const getExistingTeamsByOrganizationId = async ({
     filters: getDefaultFilter(filters),
     fetchDeleted,
   });
-
-  console.log({ teams, total_count });
 
   return { teams: teams.map((team) => teamSchema.parse(team)), total_count };
 };

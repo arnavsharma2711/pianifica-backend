@@ -55,7 +55,6 @@ export const getTeams = controllerWrapper(async (req) => {
     });
     return;
   }
-  console.log(req.query);
   const { query, page, limit, orderBy, order, fetchDeleted } =
     filterSchema.parse(req.query);
   const teams = await getExistingTeamsByOrganizationId({
@@ -248,6 +247,7 @@ export const addTeamMember = controllerWrapper(async (req) => {
   const team = await addNewTeamMember({
     userId: Number(userId),
     teamId: Number(id),
+    organizationId: req.user.organizationId,
     addedBy: req.user.id,
     isAdmin: req.user.isAdmin,
   });
@@ -284,6 +284,7 @@ export const removeTeamMember = controllerWrapper(async (req) => {
   await removeExistingTeamMember({
     userId: Number(userId),
     teamId: Number(id),
+    organizationId: req.user.organizationId,
     deletedBy: req.user.id,
     isAdmin: req.user.isAdmin,
   });
@@ -355,6 +356,7 @@ export const addTeamProject = controllerWrapper(async (req) => {
   const team = await assigneeNewTeamProject({
     teamId: Number(id),
     projectId: Number(projectId),
+    organizationId: req.user.organizationId,
     addedBy: req.user.id,
     isAdmin: req.user.isAdmin,
   });
@@ -391,6 +393,7 @@ export const removeTeamProject = controllerWrapper(async (req) => {
   await removeExistingTeamProject({
     teamId: Number(id),
     projectId: Number(projectId),
+    organizationId: req.user.organizationId,
     deletedBy: req.user.id,
     isAdmin: req.user.isAdmin,
   });

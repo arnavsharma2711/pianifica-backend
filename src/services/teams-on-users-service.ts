@@ -5,16 +5,19 @@ import type { TeamRole } from "@prisma/client";
 import { getExistingTeamById } from "./team-service";
 import { userSchema } from "../lib/schema/user.schema";
 import { teamSchema } from "../lib/schema/team.schema";
+import { createNewNotification } from "./notification-service";
 
 export const addNewTeamMember = async ({
   userId,
   teamId,
+  organizationId,
   role = "MEMBER",
   addedBy,
   isAdmin,
 }: {
   userId: number;
   teamId: number;
+  organizationId: number;
   role?: TeamRole;
   addedBy: number;
   isAdmin: boolean;
@@ -32,6 +35,11 @@ export const addNewTeamMember = async ({
       );
     }
   }
+  const existingTeam = await getExistingTeamById({
+    id: teamId,
+    organizationId,
+  });
+
   const existingTeamOnUser =
     await teamsOnUsersModel.getTeamsOnUsersByUserIdAndTeamId({
       userId,
@@ -46,6 +54,16 @@ export const addNewTeamMember = async ({
     userId,
     teamId,
     role,
+  });
+
+  createNewNotification({
+    userId,
+    notifiableType: "Team",
+    notifiableId: teamId,
+    status: "Added",
+    variables: {
+      "<team_name>": existingTeam.name,
+    },
   });
 
   return teamOnUser;
@@ -102,12 +120,14 @@ export const getUserTeams = async ({
 export const updateExistingTeamMemberRole = async ({
   userId,
   teamId,
+  organizationId,
   role,
   updatedBy,
   isAdmin,
 }: {
   userId: number;
   teamId: number;
+  organizationId: number;
   role: TeamRole;
   updatedBy: number;
   isAdmin: boolean;
@@ -125,6 +145,12 @@ export const updateExistingTeamMemberRole = async ({
       );
     }
   }
+
+  const existingTeam = await getExistingTeamById({
+    id: teamId,
+    organizationId,
+  });
+
   const existingTeamOnUser =
     await teamsOnUsersModel.getTeamsOnUsersByUserIdAndTeamId({
       userId,
@@ -141,17 +167,29 @@ export const updateExistingTeamMemberRole = async ({
     role,
   });
 
+  createNewNotification({
+    userId,
+    notifiableType: "Team",
+    notifiableId: teamId,
+    status: role === "MANAGER" ? "Promoted" : "Demoted",
+    variables: {
+      "<team_name>": existingTeam.name,
+    },
+  });
+
   return teamOnUser;
 };
 
 export const removeExistingTeamMember = async ({
   userId,
   teamId,
+  organizationId,
   deletedBy,
   isAdmin,
 }: {
   userId: number;
   teamId: number;
+  organizationId: number;
   deletedBy: number;
   isAdmin: boolean;
 }) => {
@@ -168,6 +206,11 @@ export const removeExistingTeamMember = async ({
       );
     }
   }
+  const existingTeam = await getExistingTeamById({
+    id: teamId,
+    organizationId,
+  });
+
   const existingTeamOnUser =
     await teamsOnUsersModel.getTeamsOnUsersByUserIdAndTeamId({
       userId,
@@ -181,6 +224,16 @@ export const removeExistingTeamMember = async ({
   await teamsOnUsersModel.deleteTeamsOnUsers({
     userId,
     teamId,
+  });
+
+  createNewNotification({
+    userId,
+    notifiableType: "Team",
+    notifiableId: teamId,
+    status: "Removed",
+    variables: {
+      "<team_name>": existingTeam.name,
+    },
   });
 
   return;
