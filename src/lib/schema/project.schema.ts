@@ -18,8 +18,8 @@ export const updateProjectSchema = z.object({
 export const projectSchema = z.object({
   id: z.number(),
   name: z.string(),
-  description: z.string().optional().nullable(),
-  budget: z.number().optional().nullable(),
+  description: z.string().nullish(),
+  budget: z.number().nullish(),
   status: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
