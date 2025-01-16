@@ -30,6 +30,7 @@ const NOTIFICATION_TYPE_MESSAGE_MAP: {
     Unassigned: "You have been unassigned from the task <task_title>.",
     Migrated:
       "The task <task_title> has been migrated to the project <project_name>.",
+    CommentAdded: "A comment has been added to the task <task_title>.",
   },
 };
 

@@ -15,7 +15,7 @@ import {
   getTaskActivityByTaskIdAndAction,
 } from "./task-activity-service";
 
-const generateTaskAssigneeNotification = async ({
+export const generateTaskAssigneeNotification = async ({
   taskId,
   status,
   variables,
@@ -24,12 +24,20 @@ const generateTaskAssigneeNotification = async ({
   status: string;
   variables: Record<string, string>;
 }) => {
+  const task = await taskModel.getTaskAuthorAndAssignee({ taskId });
+  if (!task) {
+    return;
+  }
   const result = await getTaskActivityByTaskIdAndAction({
     taskId,
     actionType: "update",
     actionOn: "assigneeId",
   });
-  const userIdsSet: Set<number> = new Set();
+  const userIdsSet: Set<number> = new Set(
+    task.assigneeId !== null
+      ? [task.authorId, task.assigneeId]
+      : [task.authorId],
+  );
   for (const record of result) {
     userIdsSet.add(record.userId);
     userIdsSet.add(Number(record.previousValue));
@@ -183,11 +191,13 @@ export const getExistingTasksByParentId = async ({
 export const getExistingTaskById = async ({
   id,
   organizationId,
+  getComments = false,
 }: {
   id: number;
   organizationId: number;
+  getComments?: boolean;
 }) => {
-  const task = await taskModel.getTaskById({ id, organizationId });
+  const task = await taskModel.getTaskById({ id, organizationId, getComments });
 
   if (!task) {
     throw new CustomError(404, "Task not found");

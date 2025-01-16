@@ -2,6 +2,7 @@ import { z } from "zod";
 import { userCardSchema } from "./user.schema";
 import { TaskPriority, TaskStatus, TaskType } from "@prisma/client";
 import { projectCardSchema } from "./project.schema";
+import { commentSchema } from "./comment.schema";
 
 export const createTaskSchema = z.object({
   projectId: z.number(),
@@ -42,5 +43,6 @@ export const taskSchema = z.object({
   taskActivity: z.array(z.object({})).nullish(),
   project: projectCardSchema,
   author: userCardSchema,
-  assignee: userCardSchema,
+  assignee: userCardSchema.nullish(),
+  comment: z.array(commentSchema).optional(),
 });

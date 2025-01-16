@@ -2,6 +2,7 @@ import { controllerWrapper } from "../lib/controllerWrapper";
 import { filterSchema, taskFilterSchema } from "../lib/schema/filter.schema";
 import { createTaskSchema, updateTaskSchema } from "../lib/schema/task.schema";
 import { response } from "../middlewares/response";
+import { getExistingCommentsByTaskId } from "../services/comment-service";
 import { getTaskActivityByTaskId } from "../services/task-activity-service";
 import {
   createNewTask,
@@ -103,6 +104,7 @@ export const getTask = controllerWrapper(async (req) => {
   const task = await getExistingTaskById({
     id: Number(id),
     organizationId: req.user.organizationId,
+    getComments: true,
   });
 
   response.success({
@@ -205,6 +207,42 @@ export const getTaskActivity = controllerWrapper(async (req) => {
     status: 200,
     message: "Task activity fetched successfully",
     data: activities,
+  });
+});
+
+// GET api/task/:id/comments
+export const getCommentsByTaskId = controllerWrapper(async (req) => {
+  if (!req.user) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+  const { taskId } = req.params;
+  if (!taskId) {
+    response.invalid({
+      message: "Task id is required",
+    });
+    return;
+  }
+  const { query, page, limit, orderBy, order } = filterSchema.parse(req.query);
+  const { comments, total_count } = await getExistingCommentsByTaskId({
+    taskId: Number(taskId),
+    organizationId: req.user.organizationId,
+    filters: {
+      query,
+      page,
+      limit,
+      orderBy,
+      order,
+    },
+  });
+
+  response.success({
+    status: 200,
+    message: "Comments fetched successfully",
+    data: comments,
+    total_count,
   });
 });
 

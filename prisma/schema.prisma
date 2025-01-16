@@ -57,6 +57,7 @@ model User {
   authoredTasks  Task[]         @relation("TaskAuthor")
   assignedTasks  Task[]         @relation("TaskAssignee")
   taskActivities TaskActivity[]
+  comment        Comment[]
 
   @@unique([username, organizationId])
 }
@@ -222,6 +223,7 @@ model Task {
   subTasks       Task[]         @relation("Task_SubTask")
   parent         Task?          @relation("Task_SubTask", fields: [parentId], references: [id])
   taskActivities TaskActivity[]
+  comment        Comment[]
 }
 
 model TaskActivity {
@@ -233,6 +235,19 @@ model TaskActivity {
   previousValue String?
   updatedValue  String?
   createdAt     DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  taskId    Int
+  userId    Int
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   task Task @relation(fields: [taskId], references: [id])
   user User @relation(fields: [userId], references: [id])

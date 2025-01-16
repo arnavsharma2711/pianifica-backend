@@ -226,9 +226,11 @@ export const getTasksByParentId = async ({
 export const getTaskById = async ({
   id,
   organizationId,
+  getComments = false,
 }: {
   id: number;
   organizationId: number;
+  getComments?: boolean;
 }) => {
   return await prisma.task.findUnique({
     where: {
@@ -265,6 +267,24 @@ export const getTaskById = async ({
           profilePictureUrl: true,
         },
       },
+      comment: getComments && {
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          updatedAt: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              username: true,
+              email: true,
+              profilePictureUrl: true,
+            },
+          },
+        },
+      },
     },
   });
 };
@@ -279,6 +299,24 @@ export const getSubTasksCountByTaskId = async ({
       parentId: taskId,
     },
   });
+};
+
+export const getTaskAuthorAndAssignee = async ({
+  taskId,
+}: {
+  taskId: number;
+}) => {
+  const task = await prisma.task.findUnique({
+    where: {
+      id: taskId,
+    },
+    select: {
+      authorId: true,
+      assigneeId: true,
+    },
+  });
+
+  return task;
 };
 
 // Update

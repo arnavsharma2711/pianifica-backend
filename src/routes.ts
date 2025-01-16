@@ -15,6 +15,7 @@ import * as teamController from "./controllers/team-controller";
 import * as projectController from "./controllers/project-controller";
 import * as notificationController from "./controllers/notification-controller";
 import * as taskController from "./controllers/task-controller";
+import * as commentController from "./controllers/comment-controller";
 
 const router = express.Router();
 
@@ -237,6 +238,11 @@ router.get(
   authenticationMiddleware,
   taskController.getSubTasks,
 );
+router.get(
+  "/task/:taskId/comments",
+  authenticationMiddleware,
+  taskController.getCommentsByTaskId,
+);
 router.patch(
   "/task/:id/title",
   authenticationMiddleware,
@@ -279,4 +285,22 @@ router.post(
   adminAuthenticationMiddleware,
   taskController.migrateTask,
 );
+
+// Comment
+router.post(
+  "/comment",
+  authenticationMiddleware,
+  commentController.createComment,
+);
+router.patch(
+  "/comment/:id/content",
+  authenticationMiddleware,
+  commentController.updateCommentContent,
+);
+router.delete(
+  "/comment/:id",
+  authenticationMiddleware,
+  commentController.deleteComment,
+);
+
 export default router;

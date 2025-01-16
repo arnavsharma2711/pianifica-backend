@@ -20,6 +20,7 @@ function getRandomNumber(min, max) {
 
 async function deleteAllData() {
   const modelNames = [
+    { name: "Comment", hasIdSequence: true },
     { name: "TaskActivity", hasIdSequence: true },
     { name: "Task", hasIdSequence: true },
     { name: "Notification", hasIdSequence: true },
@@ -248,6 +249,24 @@ async function createTasks() {
   });
 }
 
+async function createComment() {
+  const taskCount = await prisma.task.count();
+  const comments: Prisma.CommentCreateManyInput[] = [];
+  for (let i = 1; i <= taskCount; i++) {
+    for (let j = 1; j <= getRandomNumber(2, 5); j++) {
+      comments.push({
+        taskId: i,
+        userId: getRandomNumber(2, 11),
+        content: faker.lorem.sentence(),
+      });
+    }
+  }
+
+  await prisma.comment.createMany({
+    data: comments,
+  });
+}
+
 async function main() {
   const deletedDataSuccessfully = await deleteAllData();
   if (!deletedDataSuccessfully) {
@@ -259,6 +278,7 @@ async function main() {
   await createTeams();
   await createProjects();
   await createTasks();
+  await createComment();
 }
 
 main();
