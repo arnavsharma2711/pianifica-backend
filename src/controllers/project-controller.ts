@@ -13,6 +13,7 @@ import {
   getExistingProjects,
   updateExistingProject,
 } from "../services/project-service";
+import { getExistingTasksByProjectId } from "../services/task-service";
 import { getExistingProjectTeams } from "../services/teams-on-projects-service";
 
 // POST api/project
@@ -220,5 +221,41 @@ export const getProjectTeams = controllerWrapper(async (req) => {
     status: 200,
     message: "Project teams fetched successfully",
     data: teams,
+  });
+});
+
+// GET api/project/:id/tasks
+export const getProjectTasks = controllerWrapper(async (req) => {
+  if (!req.user) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+  const { id } = req.params;
+  if (!id) {
+    response.invalid({
+      message: "Project ID is required",
+    });
+    return;
+  }
+
+  const { query, page, limit, orderBy, order } = filterSchema.parse(req.query);
+  const tasks = await getExistingTasksByProjectId({
+    projectId: Number(id),
+    organizationId: req.user.organizationId,
+    filters: {
+      query,
+      page,
+      limit,
+      orderBy,
+      order,
+    },
+  });
+
+  response.success({
+    status: 200,
+    message: "Project tasks fetched successfully",
+    data: tasks,
   });
 });

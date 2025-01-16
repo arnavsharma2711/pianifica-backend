@@ -24,3 +24,8 @@ export const projectSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
 });
+
+export const projectCardSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+});

@@ -4,15 +4,15 @@ const NOTIFICATION_TYPE_MESSAGE_MAP: {
   };
 } = {
   Project: {
-    Created: "The project <project_name> has been successfully created.",
-    Updated: "The project <project_name> has been successfully updated.",
+    Created: "The project <project_name> has been created.",
+    Updated: "The project <project_name> has been updated.",
     Assigned:
       "The project <project_name> has been assigned to the team <team_name>.",
     Unassigned:
       "The project <project_name> has been unassigned from the team <team_name>.",
   },
   Team: {
-    Created: "The team <team_name> has been successfully created.",
+    Created: "The team <team_name> has been created.",
     Added: "You have been added to the team <team_name>.",
     Removed: "You have been removed from the team <team_name>.",
     Promoted:
@@ -22,6 +22,14 @@ const NOTIFICATION_TYPE_MESSAGE_MAP: {
   User: {
     Verify: "Please verify your email to continue using our services.",
     Reset: "A password reset request has been triggered for your account.",
+  },
+  Task: {
+    Created: "The task <task_title> has been created.",
+    Updated: "The task <task_title> has been updated.",
+    Assigned: "You have been assigned the task <task_title>.",
+    Unassigned: "You have been unassigned from the task <task_title>.",
+    Migrated:
+      "The task <task_title> has been migrated to the project <project_name>.",
   },
 };
 

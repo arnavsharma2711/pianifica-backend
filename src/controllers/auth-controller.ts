@@ -40,15 +40,8 @@ export const getCurrentUser = controllerWrapper(async (req) => {
     });
     return;
   }
-  const { id } = req.user;
-  if (!id) {
-    response.unauthorized({
-      message: "You are not authorized to perform this action",
-    });
-    return;
-  }
-
-  const user = await getExistingUserById({ id });
+  const { id, organizationId } = req.user;
+  const user = await getExistingUserById({ id, organizationId });
 
   response.success({
     status: 200,

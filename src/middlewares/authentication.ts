@@ -23,6 +23,7 @@ export const authenticationMiddleware = controllerWrapper(
     ) as JwtPayload;
     const userDetails = await getExistingUserById({
       id: decodedToken?.id,
+      organizationId: decodedToken?.organizationId,
     });
     const userRoles = await getUserRoleByUserId({
       userId: userDetails.id,

@@ -14,6 +14,7 @@ import * as userController from "./controllers/user-controller";
 import * as teamController from "./controllers/team-controller";
 import * as projectController from "./controllers/project-controller";
 import * as notificationController from "./controllers/notification-controller";
+import * as taskController from "./controllers/task-controller";
 
 const router = express.Router();
 
@@ -189,6 +190,11 @@ router.get(
   authenticationMiddleware,
   projectController.getProjectTeams,
 );
+router.get(
+  "/project/:id/tasks",
+  authenticationMiddleware,
+  projectController.getProjectTasks,
+);
 
 // Notification
 router.get(
@@ -217,4 +223,60 @@ router.delete(
   notificationController.deleteNotification,
 );
 
+// Task
+router.post("/task", authenticationMiddleware, taskController.createTask);
+router.get("/tasks", authenticationMiddleware, taskController.getTasks);
+router.get("/task/:id", authenticationMiddleware, taskController.getTask);
+router.get(
+  "/task/:id/activity",
+  authenticationMiddleware,
+  taskController.getTaskActivity,
+);
+router.get(
+  "/task/:id/subTasks",
+  authenticationMiddleware,
+  taskController.getSubTasks,
+);
+router.patch(
+  "/task/:id/title",
+  authenticationMiddleware,
+  taskController.updateTaskTitle,
+);
+router.patch(
+  "/task/:id/summary",
+  authenticationMiddleware,
+  taskController.updateTaskSummary,
+);
+router.patch(
+  "/task/:id/status",
+  authenticationMiddleware,
+  taskController.updateTaskStatus,
+);
+router.patch(
+  "/task/:id/priority",
+  authenticationMiddleware,
+  taskController.updateTaskPriority,
+);
+router.patch(
+  "/task/:id/dueDate",
+  authenticationMiddleware,
+  taskController.updateTaskDueDate,
+);
+router.patch(
+  "/task/:id/assignee",
+  authenticationMiddleware,
+  taskController.updateTaskAssignee,
+);
+router.delete(
+  "/task/:id",
+  authenticationMiddleware,
+  adminAuthenticationMiddleware,
+  taskController.deleteTask,
+);
+router.post(
+  "/task/:id/migrate",
+  authenticationMiddleware,
+  adminAuthenticationMiddleware,
+  taskController.migrateTask,
+);
 export default router;

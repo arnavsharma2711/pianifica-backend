@@ -49,11 +49,14 @@ model User {
   updatedAt         DateTime  @updatedAt
   deletedAt         DateTime?
 
-  userRoles    UserRole[]
-  organization Organization   @relation(fields: [organizationId], references: [id])
-  userToken    UserToken[]
-  teamsOnUsers TeamsOnUsers[]
-  notification Notification[]
+  userRoles      UserRole[]
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  userToken      UserToken[]
+  teamsOnUsers   TeamsOnUsers[]
+  notification   Notification[]
+  authoredTasks  Task[]         @relation("TaskAuthor")
+  assignedTasks  Task[]         @relation("TaskAssignee")
+  taskActivities TaskActivity[]
 
   @@unique([username, organizationId])
 }
@@ -112,6 +115,7 @@ model Project {
 
   organization    Organization      @relation(fields: [organizationId], references: [id])
   teamsOnProjects TeamsOnProjects[]
+  tasks           Task[]
 }
 
 model Team {
@@ -171,4 +175,65 @@ model Notification {
   user User @relation(fields: [userId], references: [id])
 
   @@index([notifiableId, notifiableType])
+}
+
+enum TaskType {
+  FEATURE
+  IMPROVEMENT
+  BUG
+}
+
+enum TaskStatus {
+  BLOCKED
+  TODO
+  IN_PROGRESS
+  UNDER_REVIEW
+  RELEASE_READY
+  COMPLETED
+}
+
+enum TaskPriority {
+  BACKLOG
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id         Int           @id @default(autoincrement())
+  projectId  Int
+  title      String
+  type       TaskType      @default(FEATURE)
+  summary    String?
+  status     TaskStatus?   @default(TODO)
+  priority   TaskPriority? @default(BACKLOG)
+  dueDate    DateTime?
+  authorId   Int
+  assigneeId Int?
+  parentId   Int?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  deletedAt  DateTime?
+
+  project        Project        @relation(fields: [projectId], references: [id])
+  author         User           @relation("TaskAuthor", fields: [authorId], references: [id])
+  assignee       User?          @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  subTasks       Task[]         @relation("Task_SubTask")
+  parent         Task?          @relation("Task_SubTask", fields: [parentId], references: [id])
+  taskActivities TaskActivity[]
+}
+
+model TaskActivity {
+  id            Int      @id @default(autoincrement())
+  taskId        Int
+  userId        Int
+  actionType    String
+  actionOn      String
+  previousValue String?
+  updatedValue  String?
+  createdAt     DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }

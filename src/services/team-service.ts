@@ -29,7 +29,7 @@ export const createNewTeam = async ({
     description,
   });
 
-  await addNewTeamMember({
+  addNewTeamMember({
     userId: createdBy,
     teamId: team.id,
     organizationId,
@@ -38,7 +38,7 @@ export const createNewTeam = async ({
     addedBy: createdBy,
   });
 
-  await createNewNotification({
+  createNewNotification({
     userId: createdBy,
     notifiableType: "Team",
     notifiableId: team.id,

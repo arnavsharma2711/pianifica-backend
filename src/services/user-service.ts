@@ -112,8 +112,14 @@ export const getExistingUser = async ({
   return user;
 };
 
-export const getExistingUserById = async ({ id }: { id: number }) => {
-  const user = await userModel.getUserById({ id });
+export const getExistingUserById = async ({
+  id,
+  organizationId,
+}: {
+  id: number;
+  organizationId: number;
+}) => {
+  const user = await userModel.getUserById({ id, organizationId });
 
   if (!user) {
     throw new CustomError(404, "User not found");

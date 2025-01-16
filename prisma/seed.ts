@@ -1,4 +1,11 @@
-import { type Prisma, PrismaClient, type ProjectStatus } from "@prisma/client";
+import {
+  type Prisma,
+  PrismaClient,
+  type ProjectStatus,
+  type TaskPriority,
+  type TaskStatus,
+  type TaskType,
+} from "@prisma/client";
 const prisma = new PrismaClient();
 import bcrypt from "bcrypt";
 import { faker } from "@faker-js/faker";
@@ -7,8 +14,15 @@ function capitalizeWords(str: string): string {
   return str.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 async function deleteAllData() {
   const modelNames = [
+    { name: "TaskActivity", hasIdSequence: true },
+    { name: "Task", hasIdSequence: true },
+    { name: "Notification", hasIdSequence: true },
     { name: "TeamsOnProjects", hasIdSequence: false },
     { name: "Project", hasIdSequence: true },
     { name: "TeamsOnUsers", hasIdSequence: false },
@@ -34,8 +48,11 @@ async function deleteAllData() {
       );
     } catch (error) {
       console.error(`Error clearing data from ${modelName.name}:`, error);
+      return false;
     }
   }
+
+  return true;
 }
 
 async function createOrganization() {
@@ -84,7 +101,9 @@ async function createUsers() {
   for (let i = 0; i < 10; i++) {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
-    const username = faker.internet.username({ firstName, lastName });
+    const username = faker.internet
+      .username({ firstName, lastName })
+      .toLowerCase();
     const email = faker.internet.email({ firstName, lastName });
 
     users.push({
@@ -203,12 +222,43 @@ async function createProjects() {
   });
 }
 
+async function createTasks() {
+  const tasks: Prisma.TaskCreateManyInput[] = [];
+  const taskTypes = ["FEATURE", "IMPROVEMENT", "BUG"];
+  const taskPriorities = ["BACKLOG", "LOW", "MEDIUM", "HIGH", "URGENT"];
+  const taskStatuses = ["TODO", "IN_PROGRESS", "UNDER_REVIEW", "RELEASE_READY"];
+  for (let i = 1; i <= 10; i++) {
+    for (let j = 1; j <= getRandomNumber(22, 30); j++) {
+      tasks.push({
+        projectId: i,
+        authorId: getRandomNumber(2, 11),
+        title: capitalizeWords(faker.lorem.sentence()),
+        type: taskTypes[getRandomNumber(0, 2)] as TaskType,
+        summary: faker.lorem.sentence({ min: 4, max: 10 }),
+        status: taskStatuses[getRandomNumber(0, 3)] as TaskStatus,
+        priority: taskPriorities[getRandomNumber(0, 4)] as TaskPriority,
+        dueDate: faker.date.soon(),
+        assigneeId: getRandomNumber(2, 11),
+      });
+    }
+  }
+
+  await prisma.task.createMany({
+    data: tasks,
+  });
+}
+
 async function main() {
-  await deleteAllData();
+  const deletedDataSuccessfully = await deleteAllData();
+  if (!deletedDataSuccessfully) {
+    console.log("Failed to delete all data");
+    return;
+  }
   await createOrganization();
   await createUsers();
   await createTeams();
   await createProjects();
+  await createTasks();
 }
 
 main();
