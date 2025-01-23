@@ -16,6 +16,7 @@ import * as projectController from "./controllers/project-controller";
 import * as notificationController from "./controllers/notification-controller";
 import * as taskController from "./controllers/task-controller";
 import * as commentController from "./controllers/comment-controller";
+import * as bookmarkController from "./controllers/bookmark-controller";
 
 const router = express.Router();
 
@@ -176,6 +177,16 @@ router.get(
   authenticationMiddleware,
   projectController.getProject,
 );
+router.post(
+  "/project/:id/bookmark",
+  authenticationMiddleware,
+  projectController.bookmarkProject,
+);
+router.delete(
+  "/project/:id/bookmark",
+  authenticationMiddleware,
+  projectController.deleteBookmark,
+);
 router.put(
   "/project/:id",
   authenticationMiddleware,
@@ -243,6 +254,16 @@ router.get(
   authenticationMiddleware,
   taskController.getCommentsByTaskId,
 );
+router.post(
+  "/task/:id/bookmark",
+  authenticationMiddleware,
+  taskController.bookmarkTask,
+);
+router.delete(
+  "/task/:id/bookmark",
+  authenticationMiddleware,
+  taskController.deleteBookmark,
+);
 router.patch(
   "/task/:id/title",
   authenticationMiddleware,
@@ -301,6 +322,18 @@ router.delete(
   "/comment/:id",
   authenticationMiddleware,
   commentController.deleteComment,
+);
+
+// Bookmark
+router.get(
+  "/bookmark/projects",
+  authenticationMiddleware,
+  bookmarkController.getBookmarkedProjects,
+);
+router.get(
+  "/bookmark/tasks",
+  authenticationMiddleware,
+  bookmarkController.getBookmarkedTasks,
 );
 
 export default router;

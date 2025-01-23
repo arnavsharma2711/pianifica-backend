@@ -192,12 +192,19 @@ export const getExistingTaskById = async ({
   id,
   organizationId,
   getComments = false,
+  userId,
 }: {
   id: number;
   organizationId: number;
   getComments?: boolean;
+  userId?: number;
 }) => {
-  const task = await taskModel.getTaskById({ id, organizationId, getComments });
+  const task = await taskModel.getTaskById({
+    id,
+    organizationId,
+    getComments,
+    userId,
+  });
 
   if (!task) {
     throw new CustomError(404, "Task not found");

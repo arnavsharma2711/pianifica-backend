@@ -2,6 +2,10 @@ import { controllerWrapper } from "../lib/controllerWrapper";
 import { filterSchema, taskFilterSchema } from "../lib/schema/filter.schema";
 import { createTaskSchema, updateTaskSchema } from "../lib/schema/task.schema";
 import { response } from "../middlewares/response";
+import {
+  addNewBookmark,
+  deleteExistingBookmark,
+} from "../services/bookmark-service";
 import { getExistingCommentsByTaskId } from "../services/comment-service";
 import { getTaskActivityByTaskId } from "../services/task-activity-service";
 import {
@@ -105,6 +109,7 @@ export const getTask = controllerWrapper(async (req) => {
     id: Number(id),
     organizationId: req.user.organizationId,
     getComments: true,
+    userId: req.user.id,
   });
 
   response.success({
@@ -243,6 +248,53 @@ export const getCommentsByTaskId = controllerWrapper(async (req) => {
     message: "Comments fetched successfully",
     data: comments,
     total_count,
+  });
+});
+
+// POST api/task/:id/bookmark
+export const bookmarkTask = controllerWrapper(async (req) => {
+  if (!req.user) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+
+  const { id } = req.params;
+
+  await addNewBookmark({
+    userId: req.user.id,
+    organizationId: req.user.organizationId,
+    entityType: "Task",
+    entityId: Number(id),
+  });
+
+  response.success({
+    status: 200,
+    message: "Task bookmarked successfully",
+  });
+});
+
+// DELETE api/task/:id/bookmark
+export const deleteBookmark = controllerWrapper(async (req) => {
+  if (!req.user) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+
+  const { id } = req.params;
+
+  await deleteExistingBookmark({
+    userId: req.user.id,
+    entityType: "Task",
+    entityId: Number(id),
+  });
+
+  response.success({
+    status: 200,
+    message: "Task bookmark deleted successfully",
   });
 });
 

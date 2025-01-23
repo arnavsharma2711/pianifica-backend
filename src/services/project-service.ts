@@ -61,19 +61,21 @@ export const getExistingProjects = async ({
 export const getExistingProjectById = async ({
   id,
   organizationId,
+  userId,
 }: {
   id: number;
   organizationId: number;
+  userId?: number;
 }) => {
   const project = await projectModel.getProjectById({
     id,
     organizationId,
+    userId,
   });
 
   if (!project) {
     throw new CustomError(404, "Project not found");
   }
-
   return projectSchema.parse(project);
 };
 

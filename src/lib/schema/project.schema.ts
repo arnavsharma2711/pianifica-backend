@@ -23,6 +23,10 @@ export const projectSchema = z.object({
   status: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  bookmark: z
+    .array(z.object({}))
+    .transform((arr) => arr.length > 0)
+    .optional(),
 });
 
 export const projectCardSchema = z.object({

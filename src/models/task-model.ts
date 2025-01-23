@@ -227,10 +227,12 @@ export const getTaskById = async ({
   id,
   organizationId,
   getComments = false,
+  userId,
 }: {
   id: number;
   organizationId: number;
   getComments?: boolean;
+  userId?: number;
 }) => {
   return await prisma.task.findUnique({
     where: {
@@ -285,6 +287,14 @@ export const getTaskById = async ({
           },
         },
       },
+      bookmark: userId
+        ? {
+            where: {
+              userId,
+              taskId: id,
+            },
+          }
+        : false,
     },
   });
 };

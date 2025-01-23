@@ -45,4 +45,8 @@ export const taskSchema = z.object({
   author: userCardSchema,
   assignee: userCardSchema.nullish(),
   comment: z.array(commentSchema).optional(),
+  bookmark: z
+    .array(z.object({}))
+    .transform((arr) => arr.length > 0)
+    .optional(),
 });

@@ -6,6 +6,10 @@ import {
 } from "../lib/schema/project.schema";
 import { response } from "../middlewares/response";
 import {
+  addNewBookmark,
+  deleteExistingBookmark,
+} from "../services/bookmark-service";
+import {
   checkProjectExistsByName,
   createNewProject,
   deleteExistingProject,
@@ -114,12 +118,60 @@ export const getProject = controllerWrapper(async (req) => {
   const project = await getExistingProjectById({
     id: Number(id),
     organizationId: req.user.organizationId,
+    userId: req.user.id,
   });
 
   response.success({
     status: 200,
     message: "Project fetched successfully",
     data: project,
+  });
+});
+
+// POST api/project/:id/bookmark
+export const bookmarkProject = controllerWrapper(async (req) => {
+  if (!req.user) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+
+  const { id } = req.params;
+
+  await addNewBookmark({
+    userId: req.user.id,
+    organizationId: req.user.organizationId,
+    entityType: "Project",
+    entityId: Number(id),
+  });
+
+  response.success({
+    status: 200,
+    message: "Project bookmarked successfully",
+  });
+});
+
+// DELETE api/project/:id/bookmark
+export const deleteBookmark = controllerWrapper(async (req) => {
+  if (!req.user) {
+    response.unauthorized({
+      message: "You are not authorized to perform this action",
+    });
+    return;
+  }
+
+  const { id } = req.params;
+
+  await deleteExistingBookmark({
+    userId: req.user.id,
+    entityType: "Project",
+    entityId: Number(id),
+  });
+
+  response.success({
+    status: 200,
+    message: "Project bookmark deleted successfully",
   });
 });
 
